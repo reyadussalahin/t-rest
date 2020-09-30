@@ -1,0 +1,11 @@
+# ignoring composer.phar
+composer.phar
+
+# ignoring any .ini file in anywhere
+*.ini
+
+# iginoring .phpunit.result.cache
+.phpunit.result.cache
+
+# ignoring vendor
+vendor/
