@@ -11,16 +11,19 @@ jobs:
     steps:
       - checkout
 
+      - run: sudo apt-get update
+
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install postgresql-client-9.6
+            sudo apt-get install libpq-dev
+            sudo apt-get install postgresql-client-9.6
 
       - run:
           name: Install PHP exts
           command: |
             sudo docker-php-ext-install pdo_pgsql
+            sudo docker-php-ext-enable pdo_pgsql
 
       - run:
           name: Copy database config.exmaple.php file to config.php
