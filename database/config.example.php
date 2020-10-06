@@ -8,8 +8,8 @@ return [
     "config" => [
         "host" => "localhost",
         "port" => "5432",
-        "dbname" => "test",
-        "user" => "root",
-        "password" => "********"
+        "dbname" => "circle_test",
+        "user" => "postgres",
+        "password" => ""
     ]
 ];

@@ -4,11 +4,28 @@ jobs:
   build:
     docker:
       - image: circleci/php:7.4-browsers
+      - image: circleci/postgres:9.6.5-alpine
+        environment:
+          TEST_DATABASE_URL: postgresql://root@localhost/circle_test
 
     steps:
       - checkout
 
-      - run: sudo apt update
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt update
+            sudo apt install postgresql-client-9.6
+
+      - run:
+          name: Install PHP exts
+          command: |
+            sudo docker-php-ext-install pdo_pgsql
+
+      - run:
+          name: Copy database config.exmaple.php file to config.php
+          command: |
+            cp database/config.exmaple.php database/config.php
 
       - restore_cache:
           keys:
