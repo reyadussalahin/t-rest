@@ -25,6 +25,10 @@ class Database implements DatabaseContract {
                 $this->config["user"],
                 $this->config["password"]
             );
+            $this->conn->setAttribute(
+                \PDO::ATTR_ERRMODE,
+                \PDO::ERRMODE_EXCEPTION
+            );
         }
         return $this->conn;
     }
