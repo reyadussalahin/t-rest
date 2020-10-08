@@ -64,6 +64,9 @@ class Repository implements RepositoryContract {
         $suffix = "";
         $i = 0;
         foreach($modelData as $fieldName => $value) {
+            if($fieldName === "id" && $value === "serial") {
+                continue;
+            }
             $data[":" . $fieldName] = $value;
             if($i === 0) {
                 $prefix .= "(";
@@ -175,6 +178,7 @@ class Repository implements RepositoryContract {
             }
             $sql .= $fieldName . " = :__updated__" . $fieldName;
             $data[":__updated__" . $fieldName] = $value;
+            $i++;
         }
         return $sql;
     }
@@ -210,7 +214,34 @@ class Repository implements RepositoryContract {
         $stmt = $this->prepareStatementAndExecute($sql, [
             ":id" => $id
         ]);
+        $row = $stmt->fetch();
+        if(!isset($row[0])) {
+            return null;
+        }
         $class = $this->model();
-        return (new $class())->assign($stmt->fetch());
+        return (new $class())->assign($row);
+    }
+
+    public function exists($id) {
+        $sql = "SELECT * FROM " . $this->table()
+            . " "
+            . "WHERE id = :id";
+        $stmt = $this->prepareStatementAndExecute($sql, [
+            ":id" => $id
+        ]);
+        $row = $stmt->fetch();
+        return isset($row[0]);
+    }
+
+    public function save($modelObject) {
+        $fields = $modelObject->get();
+        $id = $fields["id"];
+        unset($fields["id"]);
+        if($id !== "serial" && $this->exists($id)) {
+            $this->where("id", $id)
+                ->update($fields);
+        } else {
+            $this->add($fields);
+        }
     }
 }

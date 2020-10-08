@@ -26,6 +26,7 @@ class Model implements ModelContract {
 
     public function id() {
         $this->types()["id"] = "int";
+        $this->fields()["id"] = "serial";
         return $this;
     }
 

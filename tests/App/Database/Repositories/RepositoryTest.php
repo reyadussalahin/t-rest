@@ -148,4 +148,38 @@ class RespositoryTest extends TestCase {
         $this->assertEquals($repo->find(1)->name, "reyad");
         $this->assertEquals($repo->find(2)->name, "jen");
     }
+
+    public function testExists() {
+        $repo = $this->getRepo();
+        $repo->add([
+            "name" => "jen",
+            "age" => 23
+        ]);
+        $this->assertTrue($repo->exists(1)); // 'jen' exists as only user
+        $this->assertFalse($repo->exists(2));
+    }
+
+    public function testSave() {
+        $repo = $this->getRepo();
+        $repo->add([
+            "name" => "jen",
+            "age" => 23
+        ]);
+        $user = new SomeModel();
+        $user->assign([
+            "name" => "reyad",
+            "age" => 23
+        ]);
+        $repo->save($user);
+        $users = $repo->where("name", "reyad")->get();
+        $this->assertEquals($users[0]->name, "reyad");
+        $jen = $repo->where("name", "jen")->get()[0];
+        $jen->age = 25;
+        $repo->save($jen);
+        $this->assertEquals(
+            $repo->where("name", "jen")
+                ->get()[0]->age,
+            "25"
+        );
+    }
 }
