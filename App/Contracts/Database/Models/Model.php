@@ -12,6 +12,5 @@ interface Model {
     public function __get($fieldName);
     public function set($fieldName, $value);
     public function get($fieldName);
-    public function getType($fieldName);
-    public function getAll();
+    public function type($fieldName);
 }

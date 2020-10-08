@@ -47,27 +47,26 @@ class SomeRepo extends Repository {
 
 
 class RespositoryTest extends TestCase {
-    public function testContract() {
+    private function getRepo() {
         $base = __DIR__ . "/../../../..";
         $repo = new SomeRepo(
             new \App\App($base, null)
         );
+        $repo->createTable();
+        return $repo;
+    }
+
+    public function testContract() {
+        $repo = $this->getRepo();
         $this->assertTrue($repo instanceof RepositoryContract);
     }
 
     public function testAdd() {
-        $base = __DIR__ . "/../../../..";
-        $repo = new SomeRepo(
-            new \App\App($base, null)
-        );
-
-        $repo->createTable();
-
+        $repo = $this->getRepo();
         $repo->add([
             "name" => "reyad",
             "age" => 23
         ]);
-
         $sql = "SELECT name, age FROM " . $repo->table();
         $stmt = $repo->conn()->query($sql);
         $count = 0;
@@ -80,11 +79,7 @@ class RespositoryTest extends TestCase {
     }
 
     public function testGet() {
-        $base = __DIR__ . "/../../../..";
-        $repo = new SomeRepo(
-            new \App\App($base, null)
-        );
-        $repo->createTable();
+        $repo = $this->getRepo();
         $repo->add([
             "name" => "reyad",
             "age" => 23
@@ -93,21 +88,15 @@ class RespositoryTest extends TestCase {
             "name" => "jen",
             "age" => 23
         ]);
-        $rows = $repo->get();
-        $this->assertEquals($rows[0]["name"], "reyad");
-        $this->assertEquals($rows[1]["name"], "jen");
-
-        $rows = $repo->where("name", "reyad")
-            ->get();
-        $this->assertEquals($rows[0]["age"], "23");
+        $users = $repo->get();
+        $this->assertEquals($users[0]->name, "reyad");
+        $this->assertEquals($users[1]->name, "jen");
+        $users = $repo->where("name", "reyad")->get();
+        $this->assertEquals($users[0]->age, "23");
     }
 
     public function testUpdate() {
-        $base = __DIR__ . "/../../../..";
-        $repo = new SomeRepo(
-            new \App\App($base, null)
-        );
-        $repo->createTable();
+        $repo = $this->getRepo();
         $repo->add([
             "name" => "reyad",
             "age" => 23
@@ -120,21 +109,16 @@ class RespositoryTest extends TestCase {
             ->update([
                 "age" => 25
             ]);
-        $rows = $repo->whereRaw("name = 'reyad'")
-            ->get();
-        $this->assertEquals($rows[0]["age"], "25");
-        $rows = $repo->whereRaw("name = 'jen'")
+        $users = $repo->whereRaw("name = 'reyad'")->get();
+        $this->assertEquals($users[0]->age, "25");
+        $users = $repo->whereRaw("name = 'jen'")
             ->where("age", 23)
             ->get();
-        $this->assertEquals($rows[0]["age"], "23");
+        $this->assertEquals($users[0]->age, "23");
     }
 
     public function testDelete() {
-        $base = __DIR__ . "/../../../..";
-        $repo = new SomeRepo(
-            new \App\App($base, null)
-        );
-        $repo->createTable();
+        $repo = $this->getRepo();
         $repo->add([
             "name" => "reyad",
             "age" => 23
@@ -143,21 +127,16 @@ class RespositoryTest extends TestCase {
             "name" => "jen",
             "age" => 23
         ]);
-        $rows = $repo->get();
-        $this->assertEquals(count($rows), 2);
-        $repo->where("name", "reyad")
-            ->delete();
-        $rows = $repo->get();
-        $this->assertEquals(count($rows), 1);
-        $this->assertEquals($rows[0]["name"], "jen");
+        $users = $repo->get();
+        $this->assertEquals(count($users), 2);
+        $repo->where("name", "reyad")->delete();
+        $users = $repo->get();
+        $this->assertEquals(count($users), 1);
+        $this->assertEquals($users[0]->name, "jen");
     }
 
     public function testFind() {
-        $base = __DIR__ . "/../../../..";
-        $repo = new SomeRepo(
-            new \App\App($base, null)
-        );
-        $repo->createTable();
+        $repo = $this->getRepo();
         $repo->add([
             "name" => "reyad",
             "age" => 23
@@ -166,7 +145,7 @@ class RespositoryTest extends TestCase {
             "name" => "jen",
             "age" => 23
         ]);
-        $this->assertEquals($repo->find(1)["name"], "reyad");
-        $this->assertEquals($repo->find(2)["name"], "jen");
+        $this->assertEquals($repo->find(1)->name, "reyad");
+        $this->assertEquals($repo->find(2)->name, "jen");
     }
 }

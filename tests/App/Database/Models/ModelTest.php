@@ -18,7 +18,7 @@ class ModelTest extends TestCase {
         $model = new Model();
         $model->id();
         $this->assertEquals(
-            $model->getAll()["id"]["type"],
+            $model->type("id"),
             "int"
         );
     }
@@ -27,11 +27,11 @@ class ModelTest extends TestCase {
         $model = new Model();
         $model->string("name");
         $this->assertEquals(
-            $model->getAll()["name"]["type"],
+            $model->type("name"),
             "text"
         );
         $this->assertEquals(
-            $model->getAll()["name"]["value"],
+            $model->get("name"),
             null
         );
     }
@@ -40,11 +40,11 @@ class ModelTest extends TestCase {
         $model = new Model();
         $model->int("age");
         $this->assertEquals(
-            $model->getAll()["age"]["type"],
+            $model->type("age"),
             "int"
         );
         $this->assertEquals(
-            $model->getAll()["age"]["value"],
+            $model->get("age"),
             null
         );
     }
@@ -58,19 +58,19 @@ class ModelTest extends TestCase {
             "age" => 23
         ]);
         $this->assertEquals(
-            $model->getAll()["name"]["type"],
+            $model->type("name"),
             "text"
         );
         $this->assertEquals(
-            $model->getAll()["name"]["value"],
+            $model->get("name"),
             "reyad"
         );
         $this->assertEquals(
-            $model->getAll()["age"]["type"],
+            $model->type("age"),
             "int"
         );
         $this->assertEquals(
-            $model->getAll()["age"]["value"],
+            $model->get("age"),
             23
         );
     }
@@ -80,11 +80,11 @@ class ModelTest extends TestCase {
         $model->string("name");
         $model->name = "reyad";
         $this->assertEquals(
-            $model->getAll()["name"]["type"],
+            $model->type("name"),
             "text"
         );
         $this->assertEquals(
-            $model->getAll()["name"]["value"],
+            $model->get("name"),
             "reyad"
         );
     }
@@ -131,33 +131,27 @@ class ModelTest extends TestCase {
         );
     }
 
-    public function testGetType() {
-        $model = new Model();
-        $model->string("name");
-        $model->int("age");
-        $this->assertEquals(
-            $model->getType("name"),
-            "text"
-        );
-        $this->assertEquals(
-            $model->getType("age"),
-            "int"
-        );
-    }
-
-    public function testGetAll() {
+    public function testType() {
         $model = new Model();
         $model->string("name");
         $model->int("age");
         $model->name = "reyad";
         $model->age = 23;
-        $all = $model->getAll();
         $this->assertEquals(
-            $all["name"]["value"],
+            $model->type("name"),
+            "text"
+        );
+        $this->assertEquals(
+            $model->type("age"),
+            "int"
+        );
+        $fields = $model->get();
+        $this->assertEquals(
+            $fields["name"],
             "reyad"
         );
         $this->assertEquals(
-            $all["age"]["value"],
+            $fields["age"],
             23
         );
     }

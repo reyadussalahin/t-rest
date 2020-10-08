@@ -8,95 +8,70 @@ use App\Contracts\Database\Models\Model as ModelContract;
 
 class Model implements ModelContract {
     private $fields;
+    private $types;
+
+    private function &types() {
+        if($this->types === null) {
+            $this->types = [];
+        }
+        return $this->types;
+    }
+
+    private function &fields() {
+        if($this->fields === null) {
+            $this->fields = [];
+        }
+        return $this->fields;
+    }
 
     public function id() {
-        $this->fields["id"] = [
-            "type" => "int"
-        ];
+        $this->types()["id"] = "int";
         return $this;
     }
 
     public function string($fieldName, $default=null) {
-        $this->fields[$fieldName] = [
-            "type" => "text",
-            "value" => $default
-        ];
+        $this->types()[$fieldName] = "text";
+        $this->fields()[$fieldName] = $default;
         return $this;
     }
 
     public function int($fieldName, $default=null) {
-        $this->fields[$fieldName] = [
-            "type" => "int",
-            "value" => $default
-        ];
+        $this->types()[$fieldName] = "int";
+        $this->fields()[$fieldName] = $default;
         return $this;
     }
 
     public function assign($modelData) {
-        foreach($modelData as $fieldName => $value) {
-            if(isset($this->fields[$fieldName])) {
-                $this->fields[$fieldName]["value"] = $value;
-            } else {
-                throw new \Exception(
-                    "Error: column \"" . $fieldName . "\" not found",
-                    1
-                );
+        foreach($this->fields() as $fieldName => &$value) {
+            if(isset($modelData[$fieldName])) {
+                $value = $modelData[$fieldName];
             }
         }
         return $this;
     }
 
     public function __set($fieldName, $value) {
-        if(!isset($this->fields[$fieldName])) {
-            throw new \Exception(
-                "Error: column \"" . $fieldName . "\" not found",
-                1
-            );
-        }
-        $this->fields[$fieldName]["value"] = $value;
+        $this->fields()[$fieldName] = $value;
         return $value;
     }
 
     public function __get($fieldName) {
-        if(!isset($this->fields[$fieldName])) {
-            throw new \Exception(
-                "Error: column \"" . $fieldName . "\" not found",1
-            );
-        }
-        return $this->fields[$fieldName]["value"];
+        return $this->fields()[$fieldName];
     }
 
     public function set($fieldName, $value) {
-        if(!isset($this->fields[$fieldName])) {
-            throw new \Exception(
-                "Error: column \"" . $fieldName . "\" not found",
-                1
-            );
-        }
-        $this->fields[$fieldName]["value"] = $value;
+        $this->fields()[$fieldName] = $value;
         return $this;
     }
 
-    public function get($fieldName) {
-        if(!isset($this->fields[$fieldName])) {
-            throw new \Exception(
-                "Error: column \"" . $fieldName . "\" not found",
-                1
-            );
+    public function get($fieldName=null) {
+        if($fieldName === null) {
+            return $this->fields();
         }
-        return $this->fields[$fieldName]["value"];
+        return $this->fields()[$fieldName];
     }
 
-    public function getType($fieldName) {
-        if(!isset($this->fields[$fieldName])) {
-            throw new \Exception(
-                "Error: column \"" . $fieldName . "\" not found",1
-            );
-        }
-        return $this->fields[$fieldName]["type"];
-    }
-
-    public function getAll() {
-        return $this->fields;
+    public function type($fieldName) {
+        return $this->types()[$fieldName];
     }
 }

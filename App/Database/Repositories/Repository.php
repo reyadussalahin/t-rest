@@ -43,7 +43,7 @@ class Repository implements RepositoryContract {
         return $this->conn;
     }
 
-    private function prepareAndExecute($sql, $data) {
+    private function prepareStatementAndExecute($sql, $data) {
         if(!($stmt = $this->conn()->prepare($sql))) {
             throw new \Exception(
                 "Couldn't prepare statement for table \"" . $this->table() . "\"",
@@ -59,23 +59,16 @@ class Repository implements RepositoryContract {
         return $stmt;
     }
 
-    public function add($modelData) {
-        $prefix = "INSERT INTO " . $this->table() . " (";
-        $suffix = " VALUES (";
-
-        $class = $this->model();
-        $model = new $class();
-        $model->assign($modelData);
-        $all = $model->getAll();
-
-        $data = [];
+    private function prepareSqlForInsert($modelData, &$data) {
+        $prefix = "";
+        $suffix = "";
         $i = 0;
-        foreach($all as $fieldName => $value) {
-            if($fieldName === "id") {
-                continue;
-            }
-            $data[":" . $fieldName] = $value["value"];
-            if($i !== 0) {
+        foreach($modelData as $fieldName => $value) {
+            $data[":" . $fieldName] = $value;
+            if($i === 0) {
+                $prefix .= "(";
+                $suffix .= " VALUES (";
+            } else {
                 $prefix .= ", ";
                 $suffix .= ", ";
             }
@@ -85,8 +78,15 @@ class Repository implements RepositoryContract {
         }
         $prefix .= ")";
         $suffix .= ")";
-        $sql = $prefix . $suffix;
-        $this->prepareAndExecute($sql, $data);
+        return $prefix . $suffix;
+    }
+
+    public function add($modelData) {
+        $data = [];
+        $sql = "INSERT INTO " . $this->table()
+            . " "
+            . $this->prepareSqlForInsert($modelData, $data);
+        $this->prepareStatementAndExecute($sql, $data);
     }
 
     private function &filters() {
@@ -152,11 +152,16 @@ class Repository implements RepositoryContract {
         $sql = "SELECT * FROM " . $this->table()
             . " "
             . $this->prepareSqlForFilters($data);
-        $stmt = $this->prepareAndExecute($sql, $data);
+        $stmt = $this->prepareStatementAndExecute($sql, $data);
+        $all = [];
+        $class = $this->model();
+        while($row = $stmt->fetch()) {
+            $all[] = (new $class())->assign($row);
+        }
         // this is very very important
         // you must flush filters
         $this->flushFilters(); // okay, filters are flushed
-        return $stmt->fetchAll();
+        return $all;
     }
 
     private function prepareSqlForUpdates($updates, &$data) {
@@ -181,7 +186,7 @@ class Repository implements RepositoryContract {
             . $this->prepareSqlForUpdates($updates, $data)
             . " "
             . $this->prepareSqlForFilters($data);
-        $this->prepareAndExecute($sql, $data);
+        $this->prepareStatementAndExecute($sql, $data);
         // this is very very important
         // you must flush filters
         $this->flushFilters(); // okay, filters are flushed
@@ -192,7 +197,7 @@ class Repository implements RepositoryContract {
         $sql = "DELETE FROM " . $this->table()
             . " "
             . $this->prepareSqlForFilters($data);
-        $this->prepareAndExecute($sql, $data);
+        $this->prepareStatementAndExecute($sql, $data);
         // this is very very important
         // you must flush filters
         $this->flushFilters(); // okay, filters are flushed
@@ -202,9 +207,10 @@ class Repository implements RepositoryContract {
         $sql = "SELECT * FROM " . $this->table()
             . " "
             . "WHERE id = :id";
-        $stmt = $this->prepareAndExecute($sql, [
+        $stmt = $this->prepareStatementAndExecute($sql, [
             ":id" => $id
         ]);
-        return $stmt->fetch();
+        $class = $this->model();
+        return (new $class())->assign($stmt->fetch());
     }
 }
