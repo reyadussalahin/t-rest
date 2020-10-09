@@ -23,5 +23,25 @@ return [
             "name" => "user.store",
             "target" => [UserController::class, "store"]
         ]
+    ],
+
+    "PATCH" => [
+        "/user/{id}" => [
+            "name" => "user.update",
+            "target" => [UserController::class, "update"],
+            "filter" => [
+                "id" => "[0-9]+"
+            ]
+        ]
+    ],
+
+    "DELETE" => [
+        "/user/{id}" => [
+            "name" => "user.delete",
+            "target" => [UserController::class, "delete"],
+            "filter" => [
+                "id" => "[0-9]+"
+            ]
+        ]
     ]
 ];

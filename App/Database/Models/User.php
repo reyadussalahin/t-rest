@@ -11,6 +11,6 @@ class User extends Model {
         $this->id()
             ->string("username")
             ->string("email")
-            ->string("password")
+            ->string("password");
     }
 }
