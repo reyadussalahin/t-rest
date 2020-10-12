@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "03e17eea79738d1381b18d912b858e17",
+    "content-hash": "e72b3a222d2ed9f2cf2e8c85c53285af",
     "packages": [
         {
             "name": "reyadussalahin/hello-world-framework",
-            "version": "dev-master",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reyadussalahin/hello-world-framework.git",
